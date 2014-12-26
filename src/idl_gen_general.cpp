@@ -332,6 +332,7 @@ static void GenStruct(const LanguageParameters &lang, const Parser &parser,
     std::string type_name = GenTypeGet(lang, field.value.type);
     std::string method_start = "  public " + type_name + " " +
                                MakeCamel(field.name, lang.first_camel_upper);
+      
     // Generate the accessors that don't do object reuse.
     if (field.value.type.base_type == BASE_TYPE_STRUCT) {
       // Calls the accessor that takes an accessor object with a new object.
@@ -417,6 +418,17 @@ static void GenStruct(const LanguageParameters &lang, const Parser &parser,
       }
     }
     code += "; }\n";
+      
+    // Generate the checker that check the scalar type value has be set or not
+    if (IsScalar(field.value.type.base_type)) {
+        code += "  public boolean hasSet_";
+        code += field.name;
+        code += "()";
+        code += "{ return __offset(";
+        code +=  NumToString(field.value.offset);
+        code += ") != 0;}\n";
+    }
+      
     if (field.value.type.base_type == BASE_TYPE_VECTOR) {
       code += "  public int " + MakeCamel(field.name, lang.first_camel_upper);
       code += "Length(" + offset_prefix;
